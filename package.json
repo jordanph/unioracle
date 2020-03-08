@@ -1,0 +1,29 @@
+{
+  "name": "oracle",
+  "version": "1.0.0",
+  "description": "[![CircleCI](https://circleci.com/gh/jordanph/unioracle/tree/master.svg?style=shield)](https://circleci.com/gh/jordanph/unioracle/tree/master)",
+  "main": "deploy.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "truffle": "^5.1.15",
+    "truffle-assertions": "^0.9.2",
+    "truffle-hdwallet-provider": "^1.0.17",
+    "web3": "^1.2.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jordanph/unioracle.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jordanph/unioracle/issues"
+  },
+  "homepage": "https://github.com/jordanph/unioracle#readme"
+}

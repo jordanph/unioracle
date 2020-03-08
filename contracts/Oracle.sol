@@ -1,13 +1,15 @@
 pragma solidity >=0.4.21 <0.7.0;
 
 contract Oracle {
-  address public owner;
+  uint256 public requestAmount;
 
-  constructor() public {
-    owner = msg.sender;
+  constructor(uint256 _requestAmount) public {
+    requestAmount = _requestAmount;
   }
 
-  function getOwner() public view returns (address _owner) {
-    _owner = owner;
+  function requestData() public payable returns (uint256 _value) {
+    require(msg.value == requestAmount, "You must send the request amount to get the data!");
+
+    _value = 123;
   }
 }
