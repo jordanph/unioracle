@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -euo pipefail
+
+cd $(dirname $0)/..
+
+ETHCLIENT_URL=$ETHCLIENT_URL node deploy
