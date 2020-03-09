@@ -2,7 +2,9 @@ const Oracle = artifacts.require("Oracle");
 const truffleAssert = require("truffle-assertions");
 
 contract("Oracle", async accounts => {
-  const initialRequestAmount = 10000; // From initial_migration file
+  // From initial_migration file
+  const initialRequiredStakeAmount = 10000;
+  const initialRequestAmount = 20000;
 
   describe("initial deployment should correctly set", () => {
     it("request amount", async () => {
@@ -11,6 +13,58 @@ contract("Oracle", async accounts => {
       const requestAmount = await instance.requestAmount();
 
       assert.equal(requestAmount, initialRequestAmount);
+    });
+    it("required stake amount", async () => {
+      const instance = await Oracle.deployed();
+
+      const requiredStakeAmount = await instance.requiredStakeAmount();
+
+      assert.equal(requiredStakeAmount, initialRequiredStakeAmount);
+    });
+  });
+
+  describe("beginning to stake", () => {
+    it("should add sender to the pending stakers", async () => {
+      const instance = await Oracle.deployed();
+
+      const stakingAccount = accounts[1];
+
+      await instance.submitIntentionToStake({
+        value: initialRequiredStakeAmount,
+        from: stakingAccount
+      });
+
+      const staking = await instance.pendingStakers(stakingAccount);
+
+      assert.equal(staking, true);
+    });
+
+    describe("should throw error", () => {
+      it("when incorrect amount of ETH is sent", async () => {
+        const instance = await Oracle.deployed();
+
+        const requestWithTooFewEth = instance.submitIntentionToStake({
+          value: initialRequiredStakeAmount - 100
+        });
+
+        await truffleAssert.reverts(
+          requestWithTooFewEth,
+          "You must the required amount to begin staking!"
+        );
+      });
+
+      it("when no amount of ETH is sent", async () => {
+        const instance = await Oracle.deployed();
+
+        const requestWithNoEth = instance.submitIntentionToStake({
+          value: initialRequiredStakeAmount - 100
+        });
+
+        await truffleAssert.reverts(
+          requestWithNoEth,
+          "You must the required amount to begin staking!"
+        );
+      });
     });
   });
 
@@ -29,7 +83,7 @@ contract("Oracle", async accounts => {
       it("when incorrect amount of ETH is sent", async () => {
         const instance = await Oracle.deployed();
 
-        const requestWithTooFewEth = instance.requestData.call({
+        const requestWithTooFewEth = instance.requestData({
           value: initialRequestAmount - 100
         });
 
@@ -42,7 +96,7 @@ contract("Oracle", async accounts => {
       it("when no amount of ETH is sent", async () => {
         const instance = await Oracle.deployed();
 
-        const requestWithNoEth = instance.requestData.call({
+        const requestWithNoEth = instance.requestData({
           value: initialRequestAmount - 100
         });
 
