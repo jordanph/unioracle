@@ -21,6 +21,13 @@ contract("Oracle", async accounts => {
 
       assert.equal(requiredStakeAmount, initialRequiredStakeAmount);
     });
+    it("initial total minted supply to 0", async () => {
+      const instance = await Oracle.deployed();
+
+      const totalMintedSupply = await instance.totalMintedSupply();
+
+      assert.equal(totalMintedSupply, 0);
+    });
   });
 
   describe("beginning to stake", () => {
