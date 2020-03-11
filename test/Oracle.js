@@ -31,6 +31,13 @@ contract("Oracle", async accounts => {
 
       assert.equal(totalMintedSupply, 0);
     });
+    it("intial total stake intention supply to 0", async () => {
+      const instance = await Oracle.deployed();
+
+      const totalStakeIntentionSupply = await instance.totalStakeIntentionSupply();
+
+      assert.equal(totalStakeIntentionSupply, 0);
+    });
   });
 
   describe("beginning to stake", () => {
@@ -60,6 +67,7 @@ contract("Oracle", async accounts => {
 
       const stakingAccount1 = accounts[1];
       const stakingAccount2 = accounts[2];
+      const stakingAccount3 = accounts[3];
 
       await instance.submitIntentionToStake({
         value: initialRequiredStakeAmount,
@@ -71,9 +79,14 @@ contract("Oracle", async accounts => {
         from: stakingAccount2
       });
 
+      await instance.submitIntentionToStake({
+        value: initialRequiredStakeAmount,
+        from: stakingAccount3
+      });
+
       const stakingSupply = await instance.totalStakeIntentionSupply();
 
-      assert.equal(stakingSupply.toNumber(), initialRequiredStakeAmount * 2);
+      assert.equal(stakingSupply.toNumber(), initialRequiredStakeAmount * 3);
     });
 
     describe("should throw error", () => {
@@ -151,6 +164,16 @@ contract("Oracle", async accounts => {
         value: initialRequiredStakeAmount,
         from: stakingAccount
       });
+    });
+
+    it("should decrease the total stake intention supply", async () => {
+      await instance.activateStake({
+        from: stakingAccount
+      });
+
+      const totalStakeIntentionSupply = await instance.totalStakeIntentionSupply();
+
+      assert.equal(totalStakeIntentionSupply, 0);
     });
 
     describe("by the first staker should", () => {
