@@ -9,6 +9,8 @@ contract Oracle {
   uint256 public requiredStakeAmount;             // Amount of ETH required to begin staking
   uint256 public requestAmount;                   // Amount in ETH required for a request
 
+  uint256 private value;                          // The current value
+
   enum StakerType {
     INACTIVE,
     PENDING,
@@ -23,6 +25,12 @@ contract Oracle {
     totalMintedSupply = 0;
     requiredStakeAmount = _requiredStakeAmount;
     requestAmount = _requestAmount;
+  }
+
+  function updateValue(uint256 _value) public {
+    require(stakers[msg.sender] == StakerType.ACTIVE, "Only active stakers can update the value.");
+
+    value = _value;
   }
 
   function activateStake() public {
@@ -47,7 +55,7 @@ contract Oracle {
   function requestData() public payable returns (uint256 _value) {
     require(msg.value == requestAmount, "You must send the request amount to get the data!");
 
-    _value = 123;
+    _value = value;
   }
 
   function submitIntentionToStake() public payable {
