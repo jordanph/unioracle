@@ -241,6 +241,75 @@ contract("Oracle", async accounts => {
     });
   });
 
+  describe("setting value", () => {
+    let instance;
+    const stakingAccount = accounts[1];
+
+    beforeEach(async () => {
+      instance = await Oracle.new(
+        initialRequiredStakeAmount,
+        initialRequestAmount
+      );
+
+      await instance.submitIntentionToStake({
+        value: initialRequiredStakeAmount,
+        from: stakingAccount
+      });
+
+      await instance.activateStake({
+        from: stakingAccount
+      });
+    });
+
+    it("should update value for active stakers", async () => {
+      const value = 1234;
+
+      await instance.updateValue(value, {
+        from: stakingAccount
+      });
+
+      const returnedValue = await instance.requestData.call({
+        value: initialRequestAmount
+      });
+
+      assert.equal(returnedValue, value);
+    });
+
+    describe("should throw error", () => {
+      it("when sender is inactive", async () => {
+        const instance = await Oracle.deployed();
+
+        const requestFromInactiveSender = instance.updateValue(1234, {
+          from: accounts[2]
+        });
+
+        await truffleAssert.reverts(
+          requestFromInactiveSender,
+          "Only active stakers can update the value."
+        );
+      });
+
+      it("when sender is pending", async () => {
+        const instance = await Oracle.deployed();
+        const account = accounts[3];
+
+        await instance.submitIntentionToStake({
+          value: initialRequiredStakeAmount,
+          from: account
+        });
+
+        const requestFromInactiveSender = instance.updateValue(1234, {
+          from: account
+        });
+
+        await truffleAssert.reverts(
+          requestFromInactiveSender,
+          "Only active stakers can update the value."
+        );
+      });
+    });
+  });
+
   describe("requesting data", () => {
     it("should return data if correct amount of ETH is sent", async () => {
       const instance = await Oracle.deployed();
@@ -249,10 +318,23 @@ contract("Oracle", async accounts => {
         value: initialRequestAmount
       });
 
-      assert.equal(data, 123);
+      const initialValue = 0;
+
+      assert.equal(data, initialValue);
     });
 
     describe("should throw error", () => {
+      it("when trying to access getter method of value", async () => {
+        const instance = await Oracle.deployed();
+
+        try {
+          await instance.value();
+          assert.equal(true, false);
+        } catch (e) {
+          assert.equal(true, true);
+        }
+      });
+
       it("when incorrect amount of ETH is sent", async () => {
         const instance = await Oracle.deployed();
 
