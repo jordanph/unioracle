@@ -1,4 +1,5 @@
 const fs = require("fs");
+const util = require("util");
 const Web3 = require("web3");
 const HDWalletProvider = require("truffle-hdwallet-provider");
 
@@ -33,7 +34,11 @@ const deploy = (async function() {
 
 deploy
   .then(address => {
-    console.log(`Contract was successfully deployed at ${address}!`);
+    console.log(
+      `Contract was successfully deployed! Contract address is: ${address}`
+    );
+
+    fs.writeFileSync(__dirname + "/deployed_address.txt", address, "UTF8");
 
     process.exit(0);
   })
