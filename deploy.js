@@ -10,20 +10,33 @@ const web3 = new Web3(provider);
 const bytecode = fs.readFileSync("./build/Oracle.bin");
 const abi = JSON.parse(fs.readFileSync("./build/Oracle.abi"));
 
-(async function() {
+const deploy = (async function() {
   const accounts = await web3.eth.getAccounts();
   const myWalletAddress = accounts[0];
+
+  console.log(`Deploying contract with account: ${myWalletAddress}`);
 
   const myContract = new web3.eth.Contract(abi);
 
   const deployment = await myContract
     .deploy({
-      data: bytecode
+      data: "0x" + bytecode,
+      arguments: [1000, 1000]
     })
     .send({
       from: myWalletAddress,
-      gas: 5000000
+      gas: 8000000
     });
 
-  console.log(deployment.options.address);
+  return deployment.options.address;
 })();
+
+deploy
+  .then(address => {
+    console.log(`Contract was successfully deployed at ${address}!`);
+
+    process.exit(0);
+  })
+  .catch(error => {
+    console.log("Failed to deploy", error);
+  });

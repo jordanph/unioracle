@@ -4,4 +4,4 @@ set -euo pipefail
 
 cd $(dirname $0)/..
 
-solc --bin --abi -o ./build ./contracts/Oracle.sol
+solc --bin --abi --overwrite -o ./build ./contracts/Oracle.sol
