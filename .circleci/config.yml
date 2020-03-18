@@ -14,6 +14,13 @@ jobs:
       - image: circleci/node:latest
     steps:
       - checkout
+      - run: npm install
+      - run:
+          name: Setup Environment Variables
+          command: |
+            echo 'export ETHCLIENT_URL=$ETHCLIENT_URL_ROPSTEN' >> $BASH_ENV
+            echo 'export ETH_SECRET=$ETH_SECRET_ROPSTEN' >> $BASH_ENV
+            source $BASH_ENV
       - run: ./auto/deploy
       - store_artifacts:
           path: /deployed_address.txt
