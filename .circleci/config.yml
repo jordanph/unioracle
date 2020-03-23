@@ -1,7 +1,7 @@
 version: 2.1
 jobs:
   test:
-    docker: 
+    docker:
       - image: circleci/node:latest
     steps:
       - checkout
@@ -9,11 +9,28 @@ jobs:
       - run: sudo npm install -g truffle
       - run: truffle test
 
+  build:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - run: sudo add-apt-repository ppa:ethereum/ethereum -y
+      - run: sudo apt-get update
+      - run: sudo apt-get install solc
+      - run: auto/build
+      - persist_to_workspace:
+          root: build
+          paths:
+            - .
+
   deploy_ropsten:
     docker:
       - image: circleci/node:latest
     steps:
+      - attach_workspace:
+          at: ~/build
       - checkout
+      - run: mv ~/build .
       - run: npm install
       - run:
           name: Setup Environment Variables
@@ -29,6 +46,9 @@ workflows:
   test-and-deploy:
     jobs:
       - test
-      - deploy_ropsten:
+      - build:
           requires:
             - test
+      - deploy_ropsten:
+          requires:
+            - build
