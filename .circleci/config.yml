@@ -47,6 +47,9 @@ workflows:
     jobs:
       - test
       - build:
+          filters:
+            branches:
+              only: master
           requires:
             - test
       - deploy_ropsten:
