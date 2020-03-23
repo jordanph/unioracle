@@ -1,10 +1,57 @@
 version: 2.1
 jobs:
-  build:
-    docker: 
+  test:
+    docker:
       - image: circleci/node:latest
     steps:
       - checkout
       - run: npm install
       - run: sudo npm install -g truffle
       - run: truffle test
+
+  build:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - run: sudo add-apt-repository ppa:ethereum/ethereum -y
+      - run: sudo apt-get update
+      - run: sudo apt-get install solc
+      - run: auto/build
+      - persist_to_workspace:
+          root: build
+          paths:
+            - .
+
+  deploy_ropsten:
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - attach_workspace:
+          at: ~/build
+      - checkout
+      - run: mv ~/build .
+      - run: npm install
+      - run:
+          name: Setup Environment Variables
+          command: |
+            echo 'export ETHCLIENT_URL=$ETHCLIENT_URL_ROPSTEN' >> $BASH_ENV
+            echo 'export ETH_SECRET=$ETH_SECRET_ROPSTEN' >> $BASH_ENV
+            source $BASH_ENV
+      - run: ./auto/deploy
+      - store_artifacts:
+          path: /deployed_address.txt
+
+workflows:
+  test-and-deploy:
+    jobs:
+      - test
+      - build:
+          filters:
+            branches:
+              only: master
+          requires:
+            - test
+      - deploy_ropsten:
+          requires:
+            - build

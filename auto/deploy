@@ -5,3 +5,12 @@ set -euo pipefail
 cd $(dirname $0)/..
 
 ETHCLIENT_URL=$ETHCLIENT_URL node deploy
+
+export STATUS_CODE=$?
+
+if [[ $STATUS_CODE -eq 0 ]]; then
+    echo "123"
+fi
+
+echo $STATUS_CODE
+exit $STATUS_CODE
